@@ -1,6 +1,19 @@
 #import <UIKit/UIKit.h>
 #import <sqlite3.h>
+@interface BAPassthroughWindow : UIWindow
+@end
 
+@implementation BAPassthroughWindow
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *hit = [super hitTest:point withEvent:event];
+    if (hit == self.rootViewController.view) {
+        return nil;
+    }
+    return hit;
+}
+
+@end
 @interface BACheatMenu : NSObject
 @property(nonatomic,strong) UIWindow *window;
 @property(nonatomic,strong) UIButton *bubble;
@@ -13,7 +26,7 @@
  dispatch_async(dispatch_get_main_queue(), ^{
   UIWindowScene *scene=nil; for(UIScene *s in UIApplication.sharedApplication.connectedScenes) if(s.activationState==UISceneActivationStateForegroundActive){scene=(UIWindowScene*)s;break;}
   if(!scene) return;
-  self.window=[[UIWindow alloc] initWithWindowScene:scene]; self.window.windowLevel=UIWindowLevelAlert+5; self.window.backgroundColor=UIColor.clearColor;
+  self.window=(UIWindow *)[[BAPassthroughWindow alloc] initWithWindowScene:scene]; self.window.windowLevel=UIWindowLevelAlert+5; self.window.backgroundColor=UIColor.clearColor;
   UIViewController *root=[UIViewController new]; root.view.backgroundColor=UIColor.clearColor; self.window.rootViewController=root; self.window.hidden=NO;
   self.bubble=[UIButton buttonWithType:UIButtonTypeSystem]; self.bubble.frame=CGRectMake(18,160,58,58); self.bubble.layer.cornerRadius=29; self.bubble.backgroundColor=[UIColor colorWithWhite:.08 alpha:.92]; [self.bubble setTitle:@"BA" forState:UIControlStateNormal]; self.bubble.titleLabel.font=[UIFont boldSystemFontOfSize:18]; [self.bubble addTarget:self action:@selector(toggle) forControlEvents:UIControlEventTouchUpInside]; [root.view addSubview:self.bubble];
  });
