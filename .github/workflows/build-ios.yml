@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     runs-on: macos-15
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,7 +18,6 @@ jobs:
       - name: Build CheatMenu.framework
         run: |
           mkdir -p build/CheatMenu.framework
-
           xcrun --sdk iphoneos clang \
             -arch arm64 \
             -dynamiclib \
@@ -32,8 +30,21 @@ jobs:
             -install_name '@rpath/CheatMenu.framework/CheatMenu' \
             -o build/CheatMenu.framework/CheatMenu
 
-          cp CheatMenu/Info.plist build/CheatMenu.framework/Info.plist
+          cat > build/CheatMenu.framework/Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+          <key>CFBundleExecutable</key><string>CheatMenu</string>
+          <key>CFBundleIdentifier</key><string>local.ba.cheatmenu</string>
+          <key>CFBundleName</key><string>CheatMenu</string>
+          <key>CFBundlePackageType</key><string>FMWK</string>
+          <key>CFBundleVersion</key><string>1</string>
+          <key>CFBundleShortVersionString</key><string>1.0</string>
+          <key>MinimumOSVersion</key><string>15.0</string>
+          </dict></plist>
+          EOF
 
+          plutil -lint build/CheatMenu.framework/Info.plist
           file build/CheatMenu.framework/CheatMenu
           otool -L build/CheatMenu.framework/CheatMenu
 
