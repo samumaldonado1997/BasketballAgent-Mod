@@ -1,1 +1,49 @@
+name: Build Basketball Agent Cheat Menu
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Build CheatMenu.framework
+        run: |
+          mkdir -p build/CheatMenu.framework
+
+          xcrun --sdk iphoneos clang \
+            -arch arm64 \
+            -dynamiclib \
+            -fobjc-arc \
+            -miphoneos-version-min=15.0 \
+            CheatMenu/CheatMenu.m \
+            -framework UIKit \
+            -framework Foundation \
+            -lsqlite3 \
+            -install_name '@rpath/CheatMenu.framework/CheatMenu' \
+            -o build/CheatMenu.framework/CheatMenu
+
+          cp CheatMenu/Info.plist build/CheatMenu.framework/Info.plist
+
+          file build/CheatMenu.framework/CheatMenu
+          otool -L build/CheatMenu.framework/CheatMenu
+
+      - name: Package framework
+        run: |
+          cd build
+          zip -r BasketballAgent-CheatMenu-v1.zip CheatMenu.framework
+
+      - name: Upload compiled framework
+        uses: actions/upload-artifact@v4
+        with:
+          name: BasketballAgent-CheatMenu-v1
+          path: build/BasketballAgent-CheatMenu-v1.zip
